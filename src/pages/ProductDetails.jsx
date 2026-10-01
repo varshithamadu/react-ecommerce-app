@@ -34,9 +34,9 @@ function ProductDetails(){
 
         setReviews([...reviews, newReview])
 
-        // setReviewName("");
-        // setReviewText("");
-        // setRating(0);
+        setReviewName("");
+        setReviewText("");
+        setRating(0);
     };
 
     return(
