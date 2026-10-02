@@ -4,10 +4,17 @@ import ProductCard from "../components/ProductCard";
 import { Button, CircularProgress, Menu, MenuItem, Stack } from "@mui/material";
 import Box from "@mui/material/Box";
 import Pagination from "@mui/material/Pagination";
+import {useNavigate} from "react-router-dom";
 
-function Home({search, setSearch,filteredProducts, addToCart,
+function Home({search, setSearch, filteredProducts, addToCart,
       category, setCategory, addToWishlist, sortBy, setSortBy, loading, error, page, 
-       setPage, totalProducts, productsPerPage}) {
+       setPage, totalProducts, productsPerPage, products}) {
+
+        const navigate = useNavigate();
+        const suggestions = products.filter((product) =>
+            product.title.toLowerCase().includes(search.toLowerCase())
+        ).
+        slice(0, 5);
 
         if(loading) {
             return (
@@ -37,6 +44,18 @@ function Home({search, setSearch,filteredProducts, addToCart,
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
             />
+
+            {search && suggestions.length > 0 && (
+                <div>
+                    {suggestions.map((product) => (
+                        <div key={product.id}
+                            onClick={() => navigate(`/product/${product.id}`)}
+                        >
+                            {product.title}
+                        </div>
+                    ))}
+                </div>
+            )}
 
             <TextField 
                 select

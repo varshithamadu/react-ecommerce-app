@@ -14,6 +14,7 @@ import { CartContext } from "./context/CartContext";
 import {ThemeProvider, createTheme} from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
+
 function App(){
 
   const [search, setSearch] = useState("");
@@ -28,6 +29,7 @@ function App(){
   const [error, setError] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [recentlyViewed, setRecentlyViewed] = useState([]);
 
   const productsPerPage = 8;
 
@@ -78,6 +80,25 @@ function App(){
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
+
+  
+
+  useEffect(() => {
+    const savedRecentlyViewed = localStorage.getItem("recentlyViewed");
+
+    if(savedRecentlyViewed){
+      setRecentlyViewed(
+        JSON.parse(savedRecentlyViewed)
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "recentlyViewed",
+      JSON.stringify(recentlyViewed)
+    )
+  }, [recentlyViewed]);
 
   const addToCart = (product) => {
       setOpenSnackBar(true);
@@ -230,6 +251,7 @@ function App(){
                   setPage={setPage}
                   totalProducts={filteredProducts.length}
                   productsPerPage={productsPerPage}
+                  products={products}
 
                 />
               }
@@ -251,7 +273,11 @@ function App(){
 
             <Route
                 path="product/:id"
-                element={<ProductDetails />}
+                element={<ProductDetails 
+                  products={products}
+                  recentlyViewed={recentlyViewed}
+                  setRecentlyViewed={setRecentlyViewed}
+                />}
             />
 
             <Route

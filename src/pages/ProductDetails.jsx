@@ -1,11 +1,11 @@
 import { useParams} from "react-router-dom";
-import products from "../data/products";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Rating} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import RecentlyViewed from "../components/RecentlyViewed";
 
-function ProductDetails(){
+function ProductDetails({ products, recentlyViewed, setRecentlyViewed }) {
     const [rating, setRating] = useState(0);
     const [reviewName, setReviewName] = useState("");
     const [reviewText, setReviewText] = useState("");
@@ -39,9 +39,21 @@ function ProductDetails(){
         setRating(0);
     };
 
+    useEffect(() => {
+        if(!product) return;
+        
+        setRecentlyViewed((prev) => {
+          const filtered = prev.filter(
+            (item) => item.id !== product.id
+          );
+    
+          return [product, ...filtered].slice(0,5);
+        });
+      }, [product]);
+
     return(
         <div>
-            <h1>{product.name}</h1>
+            <h1>{product.title}</h1>
             <img 
                 src={product.image}
                 width="300"
@@ -97,7 +109,12 @@ function ProductDetails(){
                     <p>{review.review}</p>
                     <hr/>
                 </div>
+
             ))}
+
+            <RecentlyViewed
+                products={recentlyViewed}
+            />
         </div>
     );
 }
