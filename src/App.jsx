@@ -1,27 +1,28 @@
-import {Routes, Route} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import { useState, useEffect, useContext, useMemo, useCallback } from "react";
+
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import Snackbar from "@mui/material/Snackbar";
+
 import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
-import {useState} from "react";
 import CartPage from "./pages/CartPage";
 import ProductDetails from "./pages/ProductDetails";
-import Snackbar from "@mui/material/Snackbar";
 import CheckOutPage from "./pages/CheckOutPage";
 import OrderSuccess from "./pages/OrderSuccess";
 import OrdersPage from "./pages/OrdersPage";
 import WishlistPage from "./pages/WishlistPage";
-import { useContext, useEffect } from "react";
+
 import { CartContext } from "./context/CartContext";
-import {ThemeProvider, createTheme} from "@mui/material/styles";
-import CssBaseline from "@mui/material/CssBaseline";
+import useLocalStorage from "./hooks/useLocalStorage";
 
-
-function App(){
-
+function App() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
   const [openSnackBar, setOpenSnackBar] = useState(false);
   const [orders, setOrders] = useState([]);
-  const [wishlist, setWishlist] = useState([]);
+  const [wishlist, setWishlist] = useLocalStorage("wishlist", []);
   const [sortBy, setSortBy] = useState("");
   const [darkMode, setDarkMode] = useState(false);
   const [products, setProducts] = useState([]);
@@ -29,10 +30,14 @@ function App(){
   const [error, setError] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
-  const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const [recentlyViewed, setRecentlyViewed] = useLocalStorage(
+    "recentlyViewed",
+    []
+  );
 
   const productsPerPage = 8;
 
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -43,279 +48,278 @@ function App(){
     };
   });
 
+  // Fetch products
   useEffect(() => {
     fetch("https://fakestoreapi.com/products")
       .then((res) => res.json())
       .then((data) => {
-          setProducts(data);
-          setLoading(false);
+        setProducts(data);
+        setLoading(false);
       })
-    .catch(() => {
-      setError("Failed to load products.");
-      setLoading(false);
-    })
+      .catch(() => {
+        setError("Failed to load products.");
+        setLoading(false);
+      });
   }, []);
 
-  useEffect(() => {
-    const savedWishlist = localStorage.getItem("wishlist");
-    if(savedWishlist){
-      setWishlist(JSON.parse(savedWishlist));
-    }
-  }, []);
+  const { cart, setCart } = useContext(CartContext);
 
-  useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
-
-
-  const {cart, setCart} = useContext(CartContext);
-
+  // Load cart from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
-    if(savedCart){
+
+    if (savedCart) {
       setCart(JSON.parse(savedCart));
     }
   }, []);
 
+  // Save cart to localStorage
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  
-
-  useEffect(() => {
-    const savedRecentlyViewed = localStorage.getItem("recentlyViewed");
-
-    if(savedRecentlyViewed){
-      setRecentlyViewed(
-        JSON.parse(savedRecentlyViewed)
-      );
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "recentlyViewed",
-      JSON.stringify(recentlyViewed)
-    )
-  }, [recentlyViewed]);
-
-  const addToCart = (product) => {
+  // Add product to cart
+  const addToCart = useCallback(
+    (product) => {
       setOpenSnackBar(true);
+
       const existingItem = cart.find(
         (item) => item.id === product.id
       );
-    
-    if(existingItem){
-      const updatedCart = cart.map((item) =>
-        item.id === product.id
-          ? {
-            ...item,
-            quantity: item.quantity+1
-          }
-          : item
-      );
 
+      if (existingItem) {
+        const updatedCart = cart.map((item) =>
+          item.id === product.id
+            ? {
+                ...item,
+                quantity: item.quantity + 1,
+              }
+            : item
+        );
+
+        setCart(updatedCart);
+      } else {
+        setCart([...cart, { ...product, quantity: 1 }]);
+      }
+    },
+    [cart, setCart]
+  );
+
+  // Remove product from cart
+  const removeFromCart = useCallback(
+    (index) => {
+      const updatedCart = cart.filter((_, i) => i !== index);
       setCart(updatedCart);
-    }else{
-      setCart([
-        ...cart, {...product, quantity: 1}
-      ])
-    }
-  };
+    },
+    [cart, setCart]
+  );
 
+  // Filter and sort products
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter((product) => {
+        const matchesSearch = product.title
+          .toLowerCase()
+          .includes(debouncedSearch.toLowerCase());
 
-  const removeFromCart = (index) => {
-    const updatedCart = cart.filter(
-      (_, i) => i !== index
-    );
-    setCart(updatedCart);
-  }
+        const matchesCategory =
+          category === "All" || product.category === category;
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.title.toLowerCase().includes(debouncedSearch.toLowerCase());
-    const matchesCategory = 
-      category ==="All" || product.category === category;
+        return matchesSearch && matchesCategory;
+      })
+      .sort((a, b) => {
+        if (sortBy === "priceLow") {
+          return a.price - b.price;
+        }
 
-    return matchesSearch && matchesCategory;
-  })
-  .sort((a,b) => {
-    
-    if(sortBy == "priceLow") {
-      return a.price - b.price;
-    }
+        if (sortBy === "priceHigh") {
+          return b.price - a.price;
+        }
 
-    if(sortBy == "priceHigh"){
-      return b.price - a.price;
-    }
+        if (sortBy === "nameAsc") {
+          return a.title.localeCompare(b.title);
+        }
 
-    if(sortBy === "nameAsc"){
-      return a.title.localeCompare(b.title);
-    }
+        if (sortBy === "nameDesc") {
+          return b.title.localeCompare(a.title);
+        }
 
-    if(sortBy === "nameDesc"){
-      return b.title.localeCompare(a.title);
-    }
+        return 0;
+      });
+  }, [products, debouncedSearch, category, sortBy]);
 
-    return 0;
-  })
-
+  // Pagination
   const startIndex = (page - 1) * productsPerPage;
   const endIndex = startIndex + productsPerPage;
 
   const currentProducts = filteredProducts.slice(
-    startIndex, endIndex
+    startIndex,
+    endIndex
   );
 
+  // Calculate total price
   const totalPrice = cart.reduce(
     (total, item) => total + item.price * item.quantity,
     0
-  )
+  );
 
-  const increaseQuantity = (id) => {
-    const updatedCart = cart.map((item) => 
-      item.id === id
-        ? {
-          ...item,
-          quantity: item.quantity+1
-        }
-      :item
-    );
-    setCart(updatedCart);
-  }
-
-  const decreaseQuantity = (id) => {
-    const updatedCart = cart
-      .map((item) => 
+  // Increase quantity
+  const increaseQuantity = useCallback(
+    (id) => {
+      const updatedCart = cart.map((item) =>
         item.id === id
           ? {
-            ...item,
-            quantity: item.quantity-1
-          }
-        : item
-      )
-      .filter((item) => item.quantity > 0);
-    setCart(updatedCart);
-  };
+              ...item,
+              quantity: item.quantity + 1,
+            }
+          : item
+      );
 
-  const addToWishlist = (product) => {
-    const exists = wishlist.find(
-      (item) => item.id === product.id
-    );
+      setCart(updatedCart);
+    },
+    [cart, setCart]
+  );
 
-    if(!exists){
-      setWishlist([...wishlist, product]);
-    }
-  };
+  // Decrease quantity
+  const decreaseQuantity = useCallback(
+    (id) => {
+      const updatedCart = cart
+        .map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                quantity: item.quantity - 1,
+              }
+            : item
+        )
+        .filter((item) => item.quantity > 0);
 
+      setCart(updatedCart);
+    },
+    [cart, setCart]
+  );
+
+  // Add product to wishlist
+  const addToWishlist = useCallback(
+    (product) => {
+      const exists = wishlist.find(
+        (item) => item.id === product.id
+      );
+
+      if (!exists) {
+        setWishlist([...wishlist, product]);
+      }
+    },
+    [wishlist, setWishlist]
+  );
+
+  // MUI theme
   const theme = createTheme({
     palette: {
       mode: darkMode ? "dark" : "light",
-    }
+    },
   });
 
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline/>
-        <>
-          <NavBar 
-            cartCount={cart.length}
-            darkMode={darkMode}
-            setDarkMode={setDarkMode}
+      <CssBaseline />
+
+      <>
+        <NavBar
+          cartCount={cart.length}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+        />
+
+        <Snackbar
+          open={openSnackBar}
+          autoHideDuration={3000}
+          onClose={() => setOpenSnackBar(false)}
+          message="Product added to cart"
+        />
+
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                search={search}
+                setSearch={setSearch}
+                filteredProducts={currentProducts}
+                addToCart={addToCart}
+                category={category}
+                setCategory={setCategory}
+                addToWishlist={addToWishlist}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                loading={loading}
+                error={error}
+                page={page}
+                setPage={setPage}
+                totalProducts={filteredProducts.length}
+                productsPerPage={productsPerPage}
+                products={products}
+              />
+            }
           />
 
-          <Snackbar
-            open={openSnackBar}
-            autoHideDuration={3000}
-            onClose={() => setOpenSnackBar(false)}
-            message="Product added to cart"
+          <Route
+            path="/cart"
+            element={
+              <CartPage
+                cart={cart}
+                removeFromCart={removeFromCart}
+                totalPrice={totalPrice}
+                increaseQuantity={increaseQuantity}
+                decreaseQuantity={decreaseQuantity}
+              />
+            }
           />
-          
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <Home
-                  search={search}
-                  setSearch={setSearch}
-                  filteredProducts={currentProducts}
-                  addToCart={addToCart}
-                  category={category}
-                  setCategory={setCategory}
-                  addToWishlist={addToWishlist}
-                  sortBy={sortBy}
-                  setSortBy={setSortBy}
-                  loading={loading}
-                  error={error}
-                  page={page}
-                  setPage={setPage}
-                  totalProducts={filteredProducts.length}
-                  productsPerPage={productsPerPage}
-                  products={products}
 
-                />
-              }
-            />
-              
+          <Route
+            path="product/:id"
+            element={
+              <ProductDetails
+                products={products}
+                recentlyViewed={recentlyViewed}
+                setRecentlyViewed={setRecentlyViewed}
+              />
+            }
+          />
 
-            <Route
-              path="/cart"
-              element={
-                <CartPage
-                  cart={cart}
-                  removeFromCart={removeFromCart}
-                  totalPrice={totalPrice}
-                  increaseQuantity={increaseQuantity}
-                  decreaseQuantity={decreaseQuantity}
-                />
-              }
-            />
+          <Route
+            path="/checkout"
+            element={
+              <CheckOutPage
+                cart={cart}
+                totalPrice={totalPrice}
+                setCart={setCart}
+                orders={orders}
+                setOrders={setOrders}
+              />
+            }
+          />
 
-            <Route
-                path="product/:id"
-                element={<ProductDetails 
-                  products={products}
-                  recentlyViewed={recentlyViewed}
-                  setRecentlyViewed={setRecentlyViewed}
-                />}
-            />
+          <Route
+            path="/order-success"
+            element={<OrderSuccess />}
+          />
 
-            <Route
-              path="/checkout"
-              element={
-                <CheckOutPage
-                  cart={cart}
-                  totalPrice={totalPrice}
-                  setCart={setCart}
-                  orders={orders}
-                  setOrders={setOrders}
-                />
-              }
-            />
+          <Route
+            path="/orders"
+            element={<OrdersPage orders={orders} />}
+          />
 
-            <Route
-              path="/order-success"
-              element={<OrderSuccess />}
-            />
-
-
-            <Route
-              path="/orders"
-              element={<OrdersPage orders={orders} />}
-            />
-
-            <Route
-              path="/wishlist"
-              element={
-                <WishlistPage wishlist = {wishlist}/>
-
-              }
-            />
-
-          </Routes>
-        </>
-
+          <Route
+            path="/wishlist"
+            element={
+              <WishlistPage wishlist={wishlist} />
+            }
+          />
+        </Routes>
+      </>
     </ThemeProvider>
   );
 }
+
 export default App;

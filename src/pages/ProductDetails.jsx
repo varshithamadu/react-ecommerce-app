@@ -11,9 +11,26 @@ function ProductDetails({ products, recentlyViewed, setRecentlyViewed }) {
     const [reviewText, setReviewText] = useState("");
     const [reviews, setReviews] = useState([]);
     const {id} = useParams();
+
     const product=products.find(
         (p) => p.id === Number(id)
     );
+
+    useEffect(() => {
+        if(!product) return;
+        
+        setRecentlyViewed((prev) => {
+          const filtered = prev.filter(
+            (item) => item.id !== product.id
+          );
+    
+          return [product, ...filtered].slice(0,5);
+        });
+      }, [product]);
+
+    if (!product) {
+        return <h2>Loading Product...</h2>;
+    }
 
     const handleReview = () => {
         if(!reviewName.trim()){
@@ -39,17 +56,7 @@ function ProductDetails({ products, recentlyViewed, setRecentlyViewed }) {
         setRating(0);
     };
 
-    useEffect(() => {
-        if(!product) return;
-        
-        setRecentlyViewed((prev) => {
-          const filtered = prev.filter(
-            (item) => item.id !== product.id
-          );
     
-          return [product, ...filtered].slice(0,5);
-        });
-      }, [product]);
 
     return(
         <div>
