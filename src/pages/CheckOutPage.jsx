@@ -1,13 +1,18 @@
 import { Button, TextField } from "@mui/material";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CartContext } from "../context/CartContext";
 
-function CheckOutPage({cart, totalPrice, setCart, orders, setOrders}){
+function CheckOutPage({orders, setOrders}){
+
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
     const [address, setAddress] = useState("");
+    
     const navigate = useNavigate();
+
+    const {cart, setCart, totalPrice} = useContext(CartContext);
 
     const handleOrder = () => {
         if(!name.trim()){

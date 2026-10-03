@@ -5,7 +5,7 @@ function WishlistPage({wishlist}){
 
             {wishlist.map((item) => (
                 <div key={item.id}>
-                    {item.name}
+                    {item.title}
                 </div>
             ))}
         </div>

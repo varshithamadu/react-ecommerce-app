@@ -5,13 +5,34 @@ import { Button, CircularProgress, MenuItem,Stack } from "@mui/material";
 import Box from "@mui/material/Box";
 import Pagination from "@mui/material/Pagination";
 import { useNavigate } from "react-router-dom";
+import { useContext} from "react";
+import { ProductContext } from "../context/ProductContext";
+import { WishlistContext } from "../context/WishlistContext";
+import { CartContext  } from "../context/CartContext";
 
-function Home({ search, setSearch, filteredProducts, addToCart,
-  category, setCategory, addToWishlist, sortBy, setSortBy,
-  loading, error,page, setPage,
-  totalProducts, productsPerPage, products,}) {
+function Home() {
   const navigate = useNavigate();
+  const {
+    search,
+    setSearch,
+    category,
+    setCategory,
+    sortBy,
+    setSortBy,
+    loading,
+    error,
+    page,
+    setPage,
+    productsPerPage,
+    filteredProducts,
+    currentProducts,
+    products
+  } = useContext(ProductContext);
 
+  const {addToCart} = useContext(CartContext);
+
+  const { addToWishlist} = useContext(WishlistContext);
+  
   const suggestions = products
     .filter((product) =>
       product.title.toLowerCase().includes(search.toLowerCase())
@@ -133,7 +154,7 @@ function Home({ search, setSearch, filteredProducts, addToCart,
       >
         <Pagination
           count={Math.ceil(
-            totalProducts / productsPerPage
+            filteredProducts.length / productsPerPage
           )}
           page={page}
           onChange={(event, value) => {
