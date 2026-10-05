@@ -1,32 +1,33 @@
 import { useParams} from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Rating} from "@mui/material";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import RecentlyViewed from "../components/RecentlyViewed";
+import { RecentlyViewedContext } from "../context/RecentlyViewedContext";
+import { ProductContext } from "../context/ProductContext";
+import useLocalStorage from "../hooks/useLocalStorage";
 
-function ProductDetails({ products, recentlyViewed, setRecentlyViewed }) {
+function ProductDetails() {
     const [rating, setRating] = useState(0);
     const [reviewName, setReviewName] = useState("");
     const [reviewText, setReviewText] = useState("");
-    const [reviews, setReviews] = useState([]);
     const {id} = useParams();
+    const [reviews, setReviews] = useLocalStorage(`reviews - ${id}`, []);
+    
 
+    const {products} = useContext(ProductContext);
+    const {recentlyViewed, addRecentlyViewed} = useContext(RecentlyViewedContext);
+    
     const product=products.find(
         (p) => p.id === Number(id)
     );
 
     useEffect(() => {
-        if(!product) return;
-        
-        setRecentlyViewed((prev) => {
-          const filtered = prev.filter(
-            (item) => item.id !== product.id
-          );
-    
-          return [product, ...filtered].slice(0,5);
-        });
-      }, [product]);
+        if(product){
+            addRecentlyViewed(product);
+        }
+    }, [product]);
 
     if (!product) {
         return <h2>Loading Product...</h2>;

@@ -15,43 +15,12 @@ import OrdersPage from "./pages/OrdersPage";
 import WishlistPage from "./pages/WishlistPage";
 
 import { CartContext } from "./context/CartContext";
-import useLocalStorage from "./hooks/useLocalStorage";
-import { WishlistContext } from "./context/WishlistContext";
-import { ProductContext } from "./context/ProductContext";
 
 function App() {
 
-  const [openSnackBar, setOpenSnackBar] = useState(false);
-  const [orders, setOrders] = useState([]);
   const [darkMode, setDarkMode] = useState(false);
-  const [recentlyViewed, setRecentlyViewed] = useLocalStorage(
-    "recentlyViewed",
-    []
-  );
-
-  // Fetch products
-  // useEffect(() => {
-  //   fetch("https://fakestoreapi.com/products")
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setProducts(data);
-  //       setLoading(false);
-  //     })
-  //     .catch(() => {
-  //       setError("Failed to load products..");
-  //       setLoading(false);
-  //     });
-  // }, []);
 
   const { cart } = useContext(CartContext);
-
-  const {
-    wishlist,
-    addToWishlist,
-    removeFromWishlist,
-  } = useContext(WishlistContext);
-
-  const { products } = useContext(ProductContext);
   
   // MUI theme
   const theme = createTheme({
@@ -69,13 +38,6 @@ function App() {
           cartCount={cart.length}
           darkMode={darkMode}
           setDarkMode={setDarkMode}
-        />
-
-        <Snackbar
-          open={openSnackBar}
-          autoHideDuration={3000}
-          onClose={() => setOpenSnackBar(false)}
-          message="Product added to cart"
         />
 
         <Routes>
@@ -96,22 +58,13 @@ function App() {
           <Route
             path="product/:id"
             element={
-              <ProductDetails
-                products={products}
-                recentlyViewed={recentlyViewed}
-                setRecentlyViewed={setRecentlyViewed}
-              />
+              <ProductDetails />
             }
           />
 
           <Route
             path="/checkout"
-            element={
-              <CheckOutPage
-                orders={orders}
-                setOrders={setOrders}
-              />
-            }
+            element={<CheckOutPage />}
           />
 
           <Route
@@ -121,13 +74,13 @@ function App() {
 
           <Route
             path="/orders"
-            element={<OrdersPage orders={orders} />}
+            element={<OrdersPage />}
           />
 
           <Route
             path="/wishlist"
             element={
-              <WishlistPage wishlist={wishlist} />
+              <WishlistPage />
             }
           />
           

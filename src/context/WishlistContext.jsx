@@ -1,4 +1,4 @@
-import {createContext, useState, useEffect} from "react";
+import {createContext, useState, useEffect, useContext} from "react";
 
 export const WishlistContext = createContext();
 
@@ -28,6 +28,7 @@ function WishlistProvider({ children}){
             (item) => item.id !== id)
         );
     };
+
 
     return(
         <WishlistContext.Provider 

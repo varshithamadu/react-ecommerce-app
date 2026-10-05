@@ -2,8 +2,9 @@ import { Button, TextField } from "@mui/material";
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
+import { OrderContext } from "../context/OrderContext";
 
-function CheckOutPage({orders, setOrders}){
+function CheckOutPage(){
 
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ function CheckOutPage({orders, setOrders}){
     const navigate = useNavigate();
 
     const {cart, setCart, totalPrice} = useContext(CartContext);
+    const {orders, setOrders} =useContext(OrderContext);
 
     const handleOrder = () => {
         if(!name.trim()){

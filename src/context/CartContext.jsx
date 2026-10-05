@@ -20,7 +20,7 @@ function CartProvider({ children }){
     // Add product to cart
       const addToCart = useCallback(
         (product) => {
-    
+
           const existingItem = cart.find(
             (item) => item.id === product.id
           );
@@ -98,6 +98,7 @@ function CartProvider({ children }){
         <CartContext.Provider
             value={{
                 cart,
+                setCart,
                 addToCart,
                 removeFromCart,
                 increaseQuantity,

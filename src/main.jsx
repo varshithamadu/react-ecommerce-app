@@ -5,13 +5,19 @@ import App from './App.jsx'
 import CartProvider from './context/CartContext.jsx';
 import WishlistProvider from './context/WishlistContext.jsx';
 import ProductProvider from './context/ProductContext';
+import OrderProvider from './context/OrderContext.jsx';
+import RecentlyViewedProvider from './context/RecentlyViewedContext.jsx';
 
 ReactDom.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <CartProvider>
       <WishlistProvider>
         <ProductProvider>
-          <App />
+          <OrderProvider>
+            <RecentlyViewedProvider>
+              <App />  
+            </RecentlyViewedProvider>          
+          </OrderProvider>
         </ProductProvider>
       </WishlistProvider>
     </CartProvider>

@@ -1,4 +1,10 @@
-function WishlistPage({wishlist}){
+import { useContext } from "react";
+import { WishlistContext } from "../context/WishlistContext";
+
+function WishlistPage(){
+
+    const {wishlist, removeFromWishlist} = useContext(WishlistContext);
+
     return(
         <div>
             <h1>Wishlist</h1>

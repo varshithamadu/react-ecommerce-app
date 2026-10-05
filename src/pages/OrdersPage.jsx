@@ -1,4 +1,11 @@
-function OrdersPage({orders}){
+import { OrderContext } from "../context/OrderContext";
+import { CartContext } from "../context/CartContext";
+import { useContext } from "react";
+
+function OrdersPage({}){
+
+    const {orders} = useContext(OrderContext);
+    
     return(
         <div>
             <h1>My Orders</h1>
