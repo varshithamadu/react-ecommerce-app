@@ -1,12 +1,12 @@
 import {createContext, useState, useMemo, useEffect} from "react";
 import productsData from "../data/products.js";
+import useDebounce from "../hooks/useDebounce";
 
 export const ProductContext = createContext();
 
 function ProductProvider({ children }) {
     const [products, setProducts] = useState(productsData);
     const [search, setSearch] = useState("");
-    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [category, setCategory] = useState("All");
     const [sortBy, setSortBy] = useState("");
     const [page, setPage] = useState(1);
@@ -14,13 +14,7 @@ function ProductProvider({ children }) {
     const [error, setError] = useState("");
     const productsPerPage = 8;
 
-    // Debounce search
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(search);
-        }, 500);
-        return () => clearTimeout(timer);
-    }, [search]);
+    const debouncedSearch = useDebounce(search, 500);
 
     const filteredProducts = useMemo(() => {
         return products.filter((product) => {
@@ -60,9 +54,6 @@ function ProductProvider({ children }) {
 
                 search,
                 setSearch,
-
-                debouncedSearch,
-                setDebouncedSearch,
 
                 category,
                 setCategory,

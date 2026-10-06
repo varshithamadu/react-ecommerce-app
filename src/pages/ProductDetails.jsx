@@ -6,19 +6,21 @@ import Button from "@mui/material/Button";
 import RecentlyViewed from "../components/RecentlyViewed";
 import { RecentlyViewedContext } from "../context/RecentlyViewedContext";
 import { ProductContext } from "../context/ProductContext";
-import useLocalStorage from "../hooks/useLocalStorage";
+import { ReviewContext } from "../context/ReviewContext";
 
 function ProductDetails() {
     const [rating, setRating] = useState(0);
     const [reviewName, setReviewName] = useState("");
     const [reviewText, setReviewText] = useState("");
-    const {id} = useParams();
-    const [reviews, setReviews] = useLocalStorage(`reviews - ${id}`, []);
-    
+    const {id} = useParams();    
 
     const {products} = useContext(ProductContext);
     const {recentlyViewed, addRecentlyViewed} = useContext(RecentlyViewedContext);
-    
+    const {addReview, getReviews, getAverageRating, deleteReview} = useContext(ReviewContext);
+
+    const averageRating = getAverageRating(id);
+
+    const reviews = getReviews(id); 
     const product=products.find(
         (p) => p.id === Number(id)
     );
@@ -50,7 +52,7 @@ function ProductDetails() {
             rating: rating
         };
 
-        setReviews([...reviews, newReview])
+        addReview(id, newReview);
 
         setReviewName("");
         setReviewText("");
@@ -115,6 +117,15 @@ function ProductDetails() {
                     />
 
                     <p>{review.review}</p>
+
+                    <Button
+                        color="error"
+                        variant="outlined"
+                        onClick={() => deleteReview(id, review.id)}
+                    >
+                        Delete
+                    </Button>
+                    
                     <hr/>
                 </div>
 
@@ -123,6 +134,20 @@ function ProductDetails() {
             <RecentlyViewed
                 products={recentlyViewed}
             />
+
+            <Rating 
+                value={Number(averageRating)}
+                precision={0.5}
+                readOnly
+            />
+
+            <p>
+                {averageRating} / 5
+            </p>
+
+            <p>
+                {reviews.length} Reviews
+            </p>
         </div>
     );
 }

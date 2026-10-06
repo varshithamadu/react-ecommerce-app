@@ -4,20 +4,29 @@ import CardMedia from '@mui/material/CardMedia';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import {Link} from "react-router-dom";
+import { ReviewContext } from '../context/ReviewContext';
+import { Rating } from '@mui/material';
+import { useContext } from 'react';
+import { Stack } from '@mui/material';
 
 function ProductCard({ id, title, price, image, onAddToCart, onAddToWishList}) {
+
+    const {getAverageRating} = useContext(ReviewContext);
+    const averageRating = getAverageRating(id);
+
     return(
     <Card
         component={Link}
         to={`/product/${id}`}
         sx={{
-            width: 300,
+            width: "100%",
+            maxWidth: 300,
             height: 450,
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",    
-            marginLeft: 2,
-            marginTop: 2,
+            margin: "auto",
+            mt: 2,
             backgroundColor: "#f5f5f5",
             textDecoration: "none"
         }}
@@ -42,7 +51,7 @@ function ProductCard({ id, title, price, image, onAddToCart, onAddToWishList}) {
                 <Typography 
                     variant="h6"
                     sx={{
-                        height: 60,
+                        minHeight: 60,
                         overflow: "hidden",
                     }}
                 >
@@ -53,30 +62,47 @@ function ProductCard({ id, title, price, image, onAddToCart, onAddToWishList}) {
                     {price}
                 </Typography>
 
-                <Button 
-                    variant="contained"
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onAddToCart();
-                    }}
-                >
-                    Add to Cart
-                </Button>
+                <Stack>
+                    <Button 
+                        variant="contained"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onAddToCart();
+                        }}
+                    >
+                        Add to Cart
+                    </Button>
 
-                <Button
-                    variant="outlined"
-                    onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onAddToWishList();
-                    }}
+                    <Button
+                        variant="outlined"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onAddToWishList();
+                        }}
 
-                >
-                    ❤️ Wishlist
-                </Button>
+                    >
+                        ❤️ Wishlist
+                    </Button>
+                </Stack>
+            </CardContent>
+
+            <CardContent>
+                <Rating 
+                    value={Number(averageRating)}
+                    precision={0.5}
+                    readOnly
+                    size='small'
+                />
+
+                <Typography>
+                    {averageRating}
+                </Typography>
             </CardContent>
         </Card>
+
+        
     );
 }
 

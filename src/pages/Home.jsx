@@ -1,7 +1,7 @@
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import ProductCard from "../components/ProductCard";
-import { Button, CircularProgress, MenuItem,Stack } from "@mui/material";
+import { Button, CircularProgress, MenuItem,Skeleton,Stack } from "@mui/material";
 import Box from "@mui/material/Box";
 import Pagination from "@mui/material/Pagination";
 import { useNavigate } from "react-router-dom";
@@ -48,7 +48,12 @@ function Home() {
           mt: 35,
         }}
       >
-        <CircularProgress />
+        <Skeleton
+          variant="rectangular"
+          height={300}
+          width={250}
+        />
+
       </Box>
     );
   }
@@ -126,20 +131,25 @@ function Home() {
       </Stack>
 
       <Grid container spacing={2}>
-        {filteredProducts.map((product) => (
-          <Grid key={product.id}>
-            <ProductCard
-              id={product.id}
-              title={product.title}
-              price={product.price}
-              image={product.image}
-              page={page}
-              setPage={setPage}
-              totalProducts={filteredProducts.length}
-              productsPerPage={productsPerPage}
-              onAddToCart={() => addToCart(product)}
-              onAddToWishList={() => addToWishlist(product)}
-            />
+        {currentProducts.map((product) => (
+          <Grid
+              xs={12}
+              sm={6}
+              md={4}
+              lg={3}
+              key={product.id}>
+              <ProductCard
+                id={product.id}
+                title={product.title}
+                price={product.price}
+                image={product.image}
+                page={page}
+                setPage={setPage}
+                totalProducts={filteredProducts.length}
+                productsPerPage={productsPerPage}
+                onAddToCart={() => addToCart(product)}
+                onAddToWishList={() => addToWishlist(product)}
+              />
           </Grid>
         ))}
       </Grid>
