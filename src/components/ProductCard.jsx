@@ -101,7 +101,6 @@ function ProductCard({ id, title, price, image, onAddToCart, onAddToWishList}) {
                 </Typography>
             </CardContent>
         </Card>
-
         
     );
 }

@@ -1,21 +1,20 @@
 import Grid from "@mui/material/Grid";
 import TextField from "@mui/material/TextField";
 import ProductCard from "../components/ProductCard";
-import { Button, CircularProgress, MenuItem,Skeleton,Stack } from "@mui/material";
+import { Button, MenuItem, Skeleton, Stack } from "@mui/material";
 import Box from "@mui/material/Box";
 import Pagination from "@mui/material/Pagination";
 import { useNavigate } from "react-router-dom";
-import { useContext} from "react";
+import { useContext } from "react";
 import { ProductContext } from "../context/ProductContext";
 import { WishlistContext } from "../context/WishlistContext";
-import { CartContext  } from "../context/CartContext";
+import { CartContext } from "../context/CartContext";
 
 function Home() {
   const navigate = useNavigate();
   const {
     search,
     setSearch,
-    category,
     setCategory,
     sortBy,
     setSortBy,
@@ -29,9 +28,8 @@ function Home() {
     products
   } = useContext(ProductContext);
 
-  const {addToCart} = useContext(CartContext);
-
-  const { addToWishlist} = useContext(WishlistContext);
+  const { addToCart } = useContext(CartContext);
+  const { addToWishlist } = useContext(WishlistContext);
   
   const suggestions = products
     .filter((product) =>
@@ -41,20 +39,16 @@ function Home() {
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          mt: 35,
-        }}
-      >
-        <Skeleton
-          variant="rectangular"
-          height={300}
-          width={250}
-        />
-
-      </Box>
+      <Grid container spacing={2}>
+        {[1, 2, 3, 4].map((item) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={item}>
+            <Skeleton
+              variant="rectangular"
+              height={350}
+            />
+          </Grid>
+        ))}
+      </Grid>
     );
   }
 
@@ -64,92 +58,100 @@ function Home() {
 
   return (
     <>
-      <TextField
-        label="Search Product"
-        variant="outlined"
-        fullWidth
-        sx={{ mb: 3 }}
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
-
-      {search && suggestions.length > 0 && (
-        <div>
-          {suggestions.map((product) => (
-            <div
-              key={product.id}
-              onClick={() => navigate(`/product/${product.id}`)}
-            >
-              {product.title}
-            </div>
-          ))}
-        </div>
-      )}
-
-      <TextField
-        select
-        label="Sort By"
-        value={sortBy}
-        onChange={(e) => setSortBy(e.target.value)}
-        sx={{ mb: 3, ml: 2 }}
-      >
-        <MenuItem value="">None</MenuItem>
-
-        <MenuItem value="priceLow">
-          Price Low → High
-        </MenuItem>
-
-        <MenuItem value="priceHigh">
-          Price High → Low
-        </MenuItem>
-
-        <MenuItem value="nameAsc">
-          Name A → Z
-        </MenuItem>
-
-        <MenuItem value="nameDesc">
-          Name Z → A
-        </MenuItem>
-      </TextField>
-
       <Stack
-        direction="row"
+        direction={{ xs: "column", md: "row" }}
         spacing={2}
         sx={{ mb: 3 }}
       >
-        <Button onClick={() => setCategory("All")}>
+        <TextField
+          label="Search Product"
+          variant="outlined"
+          fullWidth
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <TextField
+          select
+          label="Sort By"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          fullWidth
+          sx={{ minWidth: 150 }}
+        >
+          <MenuItem value="">None</MenuItem>
+          <MenuItem value="priceLow">Price Low → High</MenuItem>
+          <MenuItem value="priceHigh">Price High → Low</MenuItem>
+          <MenuItem value="nameAsc">Name A → Z</MenuItem>
+          <MenuItem value="nameDesc">Name Z → A</MenuItem>
+        </TextField>
+      </Stack>
+
+      {search && suggestions.length > 0 && (
+        <Box
+          sx={{
+            border: "1px solid #ddd",
+            borderRadius: 1,
+            mb: 2,
+            backgroundColor: "#fff"
+          }}
+        >
+          {suggestions.map((product) => (
+            <Box
+              key={product.id}
+              sx={{
+                p: 1.5,
+                cursor: "pointer",
+                "&:hover": {
+                  backgroundColor: "#f5f5f5"
+                }
+              }}
+              onClick={() => navigate(`/product/${product.id}`)}
+            >
+              {product.title}
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
+        <Button variant="outlined" onClick={() => setCategory("All")}>
           All
         </Button>
-
-        <Button onClick={() => setCategory("electronics")}>
+        <Button variant="outlined" onClick={() => setCategory("electronics")}>
           Electronics
         </Button>
-
-        <Button onClick={() => setCategory("jewelery")}>
+        <Button variant="outlined" onClick={() => setCategory("jewelery")}>
           Jewelery
         </Button>
       </Stack>
 
       <Grid container spacing={2}>
         {currentProducts.map((product) => (
-          <Grid
-              xs={12}
-              sm={6}
-              md={4}
-              lg={3}
-              key={product.id}>
-              <ProductCard
-                id={product.id}
-                title={product.title}
-                price={product.price}
-                image={product.image}
-                page={page}
-                setPage={setPage}
-                totalProducts={filteredProducts.length}
-                productsPerPage={productsPerPage}
-                onAddToCart={() => addToCart(product)}
-                onAddToWishList={() => addToWishlist(product)}
-              />
+          <Grid 
+            item 
+            xs={12}
+            sm={6}
+            md={4}
+            lg={3}
+            key={product.id}
+          >
+            <ProductCard
+              id={product.id}
+              title={product.title}
+              price={product.price}
+              image={product.image}
+              page={page}
+              setPage={setPage}
+              totalProducts={filteredProducts.length}
+              productsPerPage={productsPerPage}
+              onAddToCart={() => addToCart(product)}
+              onAddToWishList={() => addToWishlist(product)}
+            />
           </Grid>
         ))}
       </Grid>
